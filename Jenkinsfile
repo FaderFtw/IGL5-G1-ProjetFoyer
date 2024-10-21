@@ -80,7 +80,7 @@ pipeline {
         stage('Docker Compose Up') {
             steps {
                 script {
-                    def imageTag = "latest"
+                    def imageTag = "$BUILD_NUMBER"
                     sh """
                     export IMAGE_TAG=${imageTag}
                     export registry=${registry}
@@ -89,6 +89,7 @@ pipeline {
                 }
             }
         }
+
 
         stage('Test AWS Credentials') {
             steps {
@@ -110,18 +111,29 @@ pipeline {
         stage('DEPLOY TO AWS KUBERNETES') {
             steps {
                 script {
+                    def imageTag = "$BUILD_NUMBER"
                     // Inject kubeconfig and AWS credentials
                     withCredentials([file(credentialsId: kubeConfigCredentialId, variable: 'KUBECONFIG'),
                                      file(credentialsId: awsCredentialsId, variable: 'AWS_CREDENTIALS_FILE')]) {
                         // Test AWS Credentials
                         sh 'aws sts get-caller-identity' // Ensure AWS CLI can access the credentials
 
-                        // Print kubeconfig content for debugging (optional)
-                        echo "Kubeconfig content: ${readFile(env.KUBECONFIG).trim()}"
+                        // Update the deployment.yaml with the image tag and registry
+                        sh """
+                        sed -i 's|image: .*|image: ${registry}:${imageTag}|' deployment.yaml
+                        cat deployment.yaml
+                        """
 
                         // Deploy to Kubernetes using the specified kubeconfig
-                        sh "kubectl --kubeconfig=${env.KUBECONFIG} apply -f deployment.yaml"
+                        sh "kubectl --kubeconfig=${env.KUBECONFIG} apply -f DB_deployment.yaml"
 
+                        // Wait for the database pod to be ready
+                        sh """
+                        kubectl --kubeconfig=${env.KUBECONFIG} rollout status deployment/my-db
+                        """
+
+                        // Deploy the main application
+                        sh "kubectl --kubeconfig=${env.KUBECONFIG} apply -f deployment.yaml"
                         sh "kubectl --kubeconfig=${env.KUBECONFIG} apply -f service.yaml"
                     }
                 }

@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-db
+  labels:
+    app: my-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-db
+  template:
+    metadata:
+      labels:
+        app: my-db
+    spec:
+      containers:
+        - name: my-db
+          image: mysql:8.0
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+            - name: MYSQL_DATABASE
+              value: tpFoyer17
+          ports:
+            - containerPort: 3306
+#          volumeMounts:
+#            - name: mysql-data
+#              mountPath: /var/lib/mysql
+#      volumes:
+#        - name: mysql-data
+#          persistentVolumeClaim:
+#            claimName: my-db-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-db
+spec:
+  selector:
+    app: my-db
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+  type: ClusterIP

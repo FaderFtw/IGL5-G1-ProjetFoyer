@@ -19,3 +19,10 @@ spec:
           image: ${registry}:${IMAGE_TAG}
           ports:
             - containerPort: 8080
+          env:  # Add environment variables here
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://my-db:3306/tpFoyer17
+            - name: SPRING_DATASOURCE_USERNAME
+              value: root
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: root
