@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: foyer-app
-          image: fadyzaafrane/tpfoyer-17:latest
+          image: ${registry}:${IMAGE_TAG}
           ports:
             - containerPort: 8080
