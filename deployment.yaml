@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foyerApp
+  labels:
+    app: foyerApp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: foyerApp
+  template:
+    metadata:
+      labels:
+        app: foyerApp
+    spec:
+      containers:
+        - name: foyerApp
+          image: fadyzaafrane/tpfoyer-17:latest
+          ports:
+            - containerPort: 8080
