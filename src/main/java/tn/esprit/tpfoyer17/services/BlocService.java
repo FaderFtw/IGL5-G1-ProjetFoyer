@@ -11,6 +11,8 @@ import tn.esprit.tpfoyer17.repositories.BlocRepository;
 import tn.esprit.tpfoyer17.repositories.ChambreRepository;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -33,7 +35,12 @@ public class BlocService implements IBlocService{
     }
     @Override
     public Bloc getBlocById(long idBloc) {
-        return blocRepository.findById(idBloc).get();
+        Optional<Bloc> blocOptional = blocRepository.findById(idBloc);
+        if (blocOptional.isPresent()) {
+            return blocOptional.get();
+        } else {
+            throw new NoSuchElementException("Bloc with ID " + idBloc + " not found.");
+        }
     }
     @Override
     public void deleteBloc(long idBloc) {
