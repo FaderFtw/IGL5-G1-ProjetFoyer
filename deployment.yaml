@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: foyer-app
-          image: "my-registry:my-image-tag"  
+          image: ${registry}:${IMAGE_TAG}
           ports:
             - containerPort: 8080
           env:  # Add environment variables here
