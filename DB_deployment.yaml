@@ -33,15 +33,16 @@ spec:
 #            claimName: my-db-pvc
 
 ---
+
 apiVersion: v1
 kind: Service
 metadata:
   name: my-db
 spec:
+  type: ClusterIP
   selector:
     app: my-db
   ports:
     - protocol: TCP
       port: 3306
       targetPort: 3306
-  type: ClusterIP

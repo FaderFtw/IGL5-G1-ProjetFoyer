@@ -120,8 +120,8 @@ pipeline {
 
                         // Update the deployment.yaml with the image tag and registry
                         sh """
-                        sed -i 's|image: .*|image: ${registry}:${imageTag}|' deployment.yaml
-                        cat deployment.yaml
+                        sed -i 's|image: .*|image: ${registry}:${imageTag}|' APP_deployment.yaml
+                        cat APP_deployment.yaml
                         """
 
                         // Deploy to Kubernetes using the specified kubeconfig
@@ -133,8 +133,7 @@ pipeline {
                         """
 
                         // Deploy the main application
-                        sh "kubectl --kubeconfig=${env.KUBECONFIG} apply -f deployment.yaml"
-                        sh "kubectl --kubeconfig=${env.KUBECONFIG} apply -f service.yaml"
+                        sh "kubectl --kubeconfig=${env.KUBECONFIG} apply -f APP_deployment.yaml"
                     }
                 }
             }
