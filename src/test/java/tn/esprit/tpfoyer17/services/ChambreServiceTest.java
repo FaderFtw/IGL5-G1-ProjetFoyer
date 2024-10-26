@@ -15,7 +15,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class ChambreServiceTest {
+class ChambreServiceTest {
 
     @Mock
     private ChambreRepository chambreRepository;
@@ -29,7 +29,7 @@ public class ChambreServiceTest {
     }
 
     @Test
-    public void testAddChambre() {
+    void testAddChambre() {
         Chambre chambre = new Chambre();
         when(chambreRepository.save(chambre)).thenReturn(chambre);
 
@@ -40,7 +40,7 @@ public class ChambreServiceTest {
     }
 
     @Test
-    public void testGetAllChambres() {
+    void testGetAllChambres() {
         List<Chambre> mockChambres = new ArrayList<>();
         when(chambreRepository.findAll()).thenReturn(mockChambres);
 
@@ -51,7 +51,7 @@ public class ChambreServiceTest {
     }
 
     @Test
-    public void testGetChambreById() {
+    void testGetChambreById() {
         long idChambre = 1L;
         Chambre mockChambre = new Chambre();
         when(chambreRepository.findById(idChambre)).thenReturn(Optional.of(mockChambre));
@@ -63,7 +63,7 @@ public class ChambreServiceTest {
     }
 
     @Test
-    public void testDeleteChambre() {
+    void testDeleteChambre() {
         long idChambre = 1L;
 
         chambreService.deleteChambre(idChambre);
@@ -72,7 +72,7 @@ public class ChambreServiceTest {
     }
 
     @Test
-    public void testUpdateChambre() {
+    void testUpdateChambre() {
         Chambre chambre = new Chambre();
         when(chambreRepository.save(chambre)).thenReturn(chambre);
 
@@ -83,7 +83,7 @@ public class ChambreServiceTest {
     }
 
     @Test
-    public void testGetChambresParNomUniversite() {
+    void testGetChambresParNomUniversite() {
         String nomUniversite = "Esprit";
         List<Chambre> mockChambres = new ArrayList<>();
         when(chambreRepository.findByBlocFoyerUniversiteNomUniversite(nomUniversite)).thenReturn(mockChambres);
