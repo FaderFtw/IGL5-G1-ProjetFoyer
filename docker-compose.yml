@@ -14,7 +14,7 @@ services:
       - mysql-data:/var/lib/mysql
 
   springboot-app:
-    image: fadyzaafrane/tpfoyer-17:${IMAGE_TAG}
+    image: ${registry}:${IMAGE_TAG}
     container_name: springboot-app
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/tpFoyer17

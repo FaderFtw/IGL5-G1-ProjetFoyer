@@ -37,7 +37,12 @@ public class ReservationService implements IReservationService{
 
     @Override
     public Reservation getReservationById(String idReservation) {
-        return reservationRepository.findById(idReservation).get();
+        Optional<Reservation> reservationOptional = reservationRepository.findById(idReservation);
+        if (reservationOptional.isPresent()) {
+            return reservationOptional.get();
+        } else {
+            throw new NoSuchElementException("Reservation with ID " + idReservation + " not found.");
+        }
     }
 
     @Override
