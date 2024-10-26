@@ -13,7 +13,7 @@ variable "cluster_name" {
 variable "subnet_ids" {
   description = "IDs des sous-réseaux"
   type        = list(string)
-  default     = ["subnet-0bb786d9559a6535f", "subnet-064cefcd948dc7f17"]  # Valeurs par défaut
+  default     = ["subnet-036b3fabc1a129cd2", "subnet-09b7594bcd31dec3c"]  # Valeurs par défaut
 }
 
 variable "role_arn" {

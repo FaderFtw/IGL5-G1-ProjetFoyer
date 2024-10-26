@@ -1,5 +1,6 @@
 package tn.esprit.tpfoyer17.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -53,10 +54,14 @@ public class FoyerService implements IFoyerService{
     @Override
     public Foyer ajouterFoyerEtAffecterAUniversite(Foyer foyer, long idUniversite) {
         Foyer foyer1 = foyerRepository.save(foyer);
-        Universite universite = universiteRepository.findById(idUniversite).get();
+
+        Universite universite = universiteRepository.findById(idUniversite)
+                .orElseThrow(() -> new EntityNotFoundException("Universite with ID " + idUniversite + " not found"));
+
         universite.setFoyer(foyer1);
         universiteRepository.save(universite);
-        return foyer1 ;
+
+        return foyer1;
     }
 
 
