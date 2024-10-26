@@ -2,14 +2,15 @@ provider "aws" {
   region = var.aws_region
 }
 
-data "aws_vpc" "existing_vpc" {
-  id = var.vpc_id
+resource "aws_vpc" "my_vpc" {
+  cidr_block = var.vpc_cidr  # Utilisation de la variable pour le CIDR
 }
+
 
 resource "aws_security_group" "eks_cluster_sg" {
   name        = "eks-cluster-sg-${var.cluster_name}"
   description = "Security group for EKS cluster ${var.cluster_name}"
-  vpc_id      = data.aws_vpc.existing_vpc.id  # Utilisation de la variable pour l'ID du VPC
+  vpc_id      = aws_vpc.my_vpc.id
 
   ingress {
     from_port   = 8080

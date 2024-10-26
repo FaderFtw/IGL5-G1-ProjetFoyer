@@ -22,14 +22,14 @@ variable "role_arn" {
   default     = "arn:aws:iam::168934866486:role/LabRole"  # Valeur par défaut
 }
 
-variable "vpc_id" {
-  description = "L'ID du VPC pour le cluster EKS"
-  type        = string
-  default     = "vpc-0548d3a81f601cd7b"  # Remplacez par votre ID de VPC réel
-}
-
-#variable "vpc_cidr" {
-#  description = "CIDR block for the VPC"
+#variable "vpc_id" {
+#  description = "L'ID du VPC pour le cluster EKS"
 #  type        = string
-#  default     = "10.0.0.0/24"  # Modifiez-le selon vos besoins
+#  default     = "vpc-0548d3a81f601cd7b"  # Remplacez par votre ID de VPC réel
 #}
+
+variable "vpc_cidr" {
+  description = "CIDR block for the VPC"
+  type        = string
+  default     = "10.0.0.0/24"  # Modifiez-le selon vos besoins
+}
