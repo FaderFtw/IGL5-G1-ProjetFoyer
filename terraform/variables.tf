@@ -10,17 +10,18 @@ variable "cluster_name" {
   default     = "KubeCluster"  # Nom du cluster mis à jour
 }
 
-variable "subnet_ids" {
-  description = "IDs des sous-réseaux"
-  type        = list(string)
-  default     = ["subnet-036b3fabc1a129cd2", "subnet-09b7594bcd31dec3c"]  # Valeurs par défaut
-}
 
 variable "role_arn" {
   description = "ARN du rôle IAM pour EKS"
   type        = string
   default     = "arn:aws:iam::168934866486:role/LabRole"  # Valeur par défaut
 }
+
+#variable "subnet_ids" {
+#  description = "IDs des sous-réseaux"
+#  type        = list(string)
+#  default     = ["subnet-036b3fabc1a129cd2", "subnet-09b7594bcd31dec3c"]  # Valeurs par défaut
+#}
 
 #variable "vpc_id" {
 #  description = "L'ID du VPC pour le cluster EKS"
@@ -31,5 +32,5 @@ variable "role_arn" {
 variable "vpc_cidr" {
   description = "CIDR block for the VPC"
   type        = string
-  default     = "10.0.0.0/24"  # Modifiez-le selon vos besoins
+  default     = "10.0.0.0/16"  # Modifiez-le selon vos besoins
 }

@@ -107,6 +107,21 @@ pipeline {
             }
         }
 
+        stage('Terraform Setup') {
+            steps {
+                script {
+                    dir('terraform') { // Change to the terraform subdirectory
+                        sh '''
+                            terraform init
+                            terraform validate
+                            terraform apply -auto-approve
+                        '''
+                    }
+                }
+            }
+        }
+
+
         // Stage to deploy on Kubernetes
         stage('DEPLOY TO AWS KUBERNETES') {
             steps {
