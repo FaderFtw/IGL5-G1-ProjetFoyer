@@ -65,7 +65,7 @@ data "aws_eks_cluster" "existing" {
   name = aws_eks_cluster.my_cluster.name
 }
 
-resource "aws_security_group_rule" "worker_port_8083" {
+resource "aws_security_group_rule" "worker_port_8080" {
   type              = "ingress"
   from_port         = 8080
   to_port           = 8080

@@ -1,6 +1,6 @@
 pipeline {
     environment {
-        registry = "fadyzaafrane/tpfoyer-17"
+        registry = "fadyzaafrane/tpfoyer-17"  // Replace with your Docker Hub username
         registryCredential = 'dockerhub_id'
         dockerImage = ''
         kubeConfigCredentialId = 'kubeCredentials'
@@ -80,7 +80,7 @@ pipeline {
         stage('Docker Compose Up') {
             steps {
                 script {
-                    def imageTag = "$BUILD_NUMBER"
+                    def imageTag = "latest"
                     sh """
                     export IMAGE_TAG=${imageTag}
                     export registry=${registry}
@@ -122,11 +122,12 @@ pipeline {
         }
 
 
+
         // Stage to deploy on Kubernetes
-        stage('DEPLOY TO AWS KUBERNETES') {
+         stage('DEPLOY TO AWS KUBERNETES') {
             steps {
                 script {
-                    def imageTag = "$BUILD_NUMBER"
+                    def imageTag = "latest"
                     // Inject kubeconfig and AWS credentials
                     withCredentials([file(credentialsId: kubeConfigCredentialId, variable: 'KUBECONFIG'),
                                      file(credentialsId: awsCredentialsId, variable: 'AWS_CREDENTIALS_FILE')]) {
