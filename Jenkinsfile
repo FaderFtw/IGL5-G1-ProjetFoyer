@@ -5,6 +5,9 @@ pipeline {
         dockerImage = ''
         kubeConfigCredentialId = 'kubeCredentials'
         awsCredentialsId = 'awsCredentials'
+        imageTag = 'latest'
+        awsRegion = 'us-east-1'
+        clusterName = 'KubeCluster'
     }
 
     agent any
@@ -121,36 +124,22 @@ pipeline {
             }
         }
 
+        stage('Get Cluster Credentials') {
+            steps {
+                sh "aws eks --region ${env.awsRegion} update-kubeconfig --name ${env.clusterName}"
+            }
+        }
 
-
-        // Stage to deploy on Kubernetes
-         stage('DEPLOY TO AWS KUBERNETES') {
+        stage('DEPLOY TO AWS KUBERNETES') {
             steps {
                 script {
-                    def imageTag = "latest"
-                    // Inject kubeconfig and AWS credentials
-                    withCredentials([file(credentialsId: kubeConfigCredentialId, variable: 'KUBECONFIG'),
-                                     file(credentialsId: awsCredentialsId, variable: 'AWS_CREDENTIALS_FILE')]) {
-                        // Test AWS Credentials
-                        sh 'aws sts get-caller-identity' // Ensure AWS CLI can access the credentials
-
-                        // Update the deployment.yaml with the image tag and registry
-                        sh """
-                        sed -i 's|image: .*|image: ${registry}:${imageTag}|' APP_deployment.yaml
-                        cat APP_deployment.yaml
-                        """
-
-                        // Deploy to Kubernetes using the specified kubeconfig
-                        sh "kubectl --kubeconfig=${env.KUBECONFIG} apply -f DB_deployment.yaml"
-
-                        // Wait for the database pod to be ready
-                        sh """
-                        kubectl --kubeconfig=${env.KUBECONFIG} rollout status deployment/my-db
-                        """
-
-                        // Deploy the main application
-                        sh "kubectl --kubeconfig=${env.KUBECONFIG} apply -f APP_deployment.yaml"
-                    }
+                    sh """
+                    sed -i 's|image: .*|image: ${registry}:${imageTag}|' APP_deployment.yaml
+                    cat APP_deployment.yaml
+                    """
+                    sh "kubectl apply -f DB_deployment.yaml"
+                    sh "kubectl rollout status deployment/my-db"
+                    sh "kubectl apply -f APP_deployment.yaml"
                 }
             }
         }
