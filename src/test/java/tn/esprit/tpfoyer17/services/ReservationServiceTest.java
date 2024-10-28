@@ -2,6 +2,9 @@ package tn.esprit.tpfoyer17.services;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -84,12 +87,13 @@ public class ReservationServiceTest {
         verify(reservationRepository, times(1)).save(reservation);
     }
 
-    @Test
-    public void testAjouterReservationNew() {
+    @ParameterizedTest
+    @ValueSource(strings = { "TRIPLE", "DOUBLE", "SIMPLE" })
+    public void testAjouterReservationNew(String typeChambre) {
         long idBloc = 1L;
         long cinEtudiant = 12345678L;
         Chambre mockChambre = new Chambre();
-        mockChambre.setTypeChambre(TypeChambre.SIMPLE);
+        mockChambre.setTypeChambre(TypeChambre.valueOf(typeChambre));
         Bloc mockBloc = new Bloc();
 
         when(reservationRepository.findForReservation(idBloc)).thenReturn(null);
@@ -101,6 +105,43 @@ public class ReservationServiceTest {
         Reservation result = reservationService.ajouterReservation(idBloc, cinEtudiant);
 
         assertNotNull(result);
+        verify(reservationRepository, times(1)).save(any(Reservation.class));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "TRIPLE, 3, false",
+            "TRIPLE, 2, false",
+            "DOUBLE, 2, false",
+            "DOUBLE, 1, false",
+            "SIMPLE, 2, false",
+            "SIMPLE, 1, false"
+    })
+    public void testAjouterReservationExisting(String typeChambre, int studentCount, boolean expectedValid) {
+        long idBloc = 1L;
+        long cinEtudiant = 12345678L;
+
+        Reservation mockExistingReservation = new Reservation();
+        Set<Etudiant> etudiants = new HashSet<>();
+        for (int i = 0; i < studentCount; i++) {
+            etudiants.add(new Etudiant());
+        }
+        mockExistingReservation.setEtudiants(etudiants);
+
+        Chambre mockChambre = new Chambre();
+        mockChambre.setTypeChambre(TypeChambre.valueOf(typeChambre));
+
+        when(reservationRepository.findForReservation(idBloc)).thenReturn(mockExistingReservation);
+        when(etudiantRepository.findByCinEtudiant(cinEtudiant)).thenReturn(new Etudiant());
+        when(chambreRepository.findByReservationsIdReservation(mockExistingReservation.getIdReservation()))
+                .thenReturn(mockChambre);
+        when(reservationRepository.save(any(Reservation.class))).thenReturn(mockExistingReservation);
+
+        Reservation result = reservationService.ajouterReservation(idBloc, cinEtudiant);
+
+        assertNotNull(result);
+        assertEquals(expectedValid, result.isEstValide());
+        verify(reservationRepository, times(1)).findForReservation(idBloc);
         verify(reservationRepository, times(1)).save(any(Reservation.class));
     }
 
@@ -120,5 +161,21 @@ public class ReservationServiceTest {
 
         assertEquals(mockReservation, result);
         verify(reservationRepository, times(1)).save(mockReservation);
+    }
+
+    @Test
+    public void testGetReservationParAnneeUniversitaireEtNomUniversite() {
+        Date anneeUniversite = new GregorianCalendar(2023, Calendar.JANUARY, 1).getTime();
+        String nomUniversite = "Test University";
+        List<Reservation> mockReservations = new ArrayList<>();
+
+        when(reservationRepository.findByAnneeUniversitaire_YearAndNomUnuiversite(2023, nomUniversite))
+                .thenReturn(mockReservations);
+
+        List<Reservation> result = reservationService
+                .getReservationParAnneeUniversitaireEtNomUniversite(anneeUniversite, nomUniversite);
+
+        assertEquals(mockReservations, result);
+        verify(reservationRepository, times(1)).findByAnneeUniversitaire_YearAndNomUnuiversite(2023, nomUniversite);
     }
 }
