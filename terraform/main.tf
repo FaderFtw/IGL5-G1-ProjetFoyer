@@ -2,7 +2,11 @@ provider "aws" {
   region = var.aws_region
 }
 
-#Network creation
+data "aws_iam_role" "lab_role" {
+  name = "LabRole"
+}
+
+# Network creation
 resource "aws_vpc" "my_vpc" {
   cidr_block = var.vpc_cidr
 }
@@ -44,10 +48,10 @@ resource "aws_route_table_association" "subnet2_association" {
   route_table_id = aws_route_table.public_route_table.id
 }
 
-#Cluster creation
+# Cluster creation
 resource "aws_eks_cluster" "my_cluster" {
   name     = var.cluster_name
-  role_arn = var.role_arn
+  role_arn = data.aws_iam_role.lab_role.arn
   version  = "1.30"
 
   vpc_config {
@@ -83,11 +87,10 @@ resource "aws_security_group_rule" "worker_port_30000" {
   security_group_id = data.aws_eks_cluster.existing.vpc_config[0].cluster_security_group_id
 }
 
-
 resource "aws_eks_node_group" "my_node_group" {
   cluster_name    = aws_eks_cluster.my_cluster.name
   node_group_name = "NodeGroup"
-  node_role_arn   = var.role_arn
+  node_role_arn   = data.aws_iam_role.lab_role.arn
   subnet_ids      = [aws_subnet.subnet1.id, aws_subnet.subnet2.id]
 
   scaling_config {
