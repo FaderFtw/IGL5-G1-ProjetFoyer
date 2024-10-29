@@ -28,31 +28,15 @@ spec:
               value: root
 
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
   name: spring-boot-service
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
-    app: foyer-app
+    app: foyer-ap
   ports:
     - protocol: TCP
-      port: 8080           # Port sur lequel ton application écoute dans le conteneur
-      targetPort: 8080      # Port exposé vers ton application
-      nodePort: 30000       # Port exposé sur le nœud Kubernetes (entre 30000 et 32767)
-
-# We can use a LoadBalancer Service instead, but it costs more
-#  apiVersion: v1
-#  kind: Service
-#  metadata:
-#    name: spring-boot-service
-#  spec:
-#    type: LoadBalancer
-#    selector:
-#      app: foyer-app
-#    ports:
-#      - protocol: TCP
-#        port: 8080           # Port where your app listens inside the container
-#        targetPort: 8080      # Port exposed to your application
+      port: 8080
+      targetPort: 8080
