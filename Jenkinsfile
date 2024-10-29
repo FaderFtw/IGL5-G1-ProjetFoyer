@@ -128,6 +128,16 @@ pipeline {
             }
         }
 
+        stage('Install Prometheus Stack') {
+            steps {
+                script {
+                    sh 'helm repo add prometheus-community https://prometheus-community.github.io/helm-charts'
+                    sh 'helm repo update'
+                    sh 'helm install mon prometheus-community/kube-prometheus-stack'
+                }
+            }
+        }
+
         stage('DEPLOY TO AWS KUBERNETES') {
             steps {
                 script {
