@@ -138,6 +138,8 @@ pipeline {
                     sh "kubectl apply -f DB_deployment.yaml"
                     sh "kubectl rollout status deployment/my-db"
                     sh "kubectl apply -f APP_deployment.yaml"
+                    sh "kubectl apply -f FRONT_deployment.yaml"
+                    sh "kubectl apply -f NGINX_deployment.yaml"
                 }
             }
         }
