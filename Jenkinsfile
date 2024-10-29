@@ -8,6 +8,7 @@ pipeline {
         imageTag = 'latest'
         awsRegion = 'us-east-1'
         clusterName = 'KubeCluster'
+        emailRecipient = 'fady.zaafrane@gmail.com'  // Add your email here
     }
 
     agent any
@@ -43,7 +44,6 @@ pipeline {
             }
         }
 
-
         stage('MVN SONARQUBE'){
             steps {
                  script {
@@ -54,7 +54,6 @@ pipeline {
                 }
             }
         }
-
 
         stage("PUBLISH TO NEXUS") {
             steps {
@@ -92,7 +91,6 @@ pipeline {
                 }
             }
         }
-
 
         stage('Test AWS Credentials') {
             steps {
@@ -142,6 +140,36 @@ pipeline {
                     sh "kubectl apply -f APP_deployment.yaml"
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            emailext (
+                subject: "SUCCESS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+                body: "Good news! The build for ${env.JOB_NAME} [${env.BUILD_NUMBER}] succeeded.\n\nCheck it here: ${env.BUILD_URL}",
+                to: "${env.emailRecipient}"
+            )
+        }
+
+        failure {
+            emailext (
+                subject: "FAILURE: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+                body: "Oops! The build for ${env.JOB_NAME} [${env.BUILD_NUMBER}] failed.\n\nCheck the details: ${env.BUILD_URL}",
+                to: "${env.emailRecipient}"
+            )
+        }
+
+        unstable {
+            emailext (
+                subject: "UNSTABLE: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+                body: "Attention! The build for ${env.JOB_NAME} [${env.BUILD_NUMBER}] is unstable.\n\nCheck it here: ${env.BUILD_URL}",
+                to: "${env.emailRecipient}"
+            )
+        }
+
+        always {
+            echo 'Sending email notification...'
         }
     }
 }
