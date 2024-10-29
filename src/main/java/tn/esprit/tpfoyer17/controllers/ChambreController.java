@@ -5,63 +5,79 @@ import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import tn.esprit.tpfoyer17.dtos.ChambreResponse;
 import tn.esprit.tpfoyer17.entities.Chambre;
 import tn.esprit.tpfoyer17.entities.enumerations.TypeChambre;
-import tn.esprit.tpfoyer17.services.ChambreService;
 import tn.esprit.tpfoyer17.services.IChambreService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@RequestMapping("api/chambres")
+@RequestMapping("/chambres")
 public class ChambreController {
     IChambreService chambreService;
-    @PostMapping("add")
-    public Chambre addingChambre(@RequestBody Chambre chambre){
-        return chambreService.addChambre(chambre);
+
+    @PostMapping
+    public ChambreResponse addChambre(@RequestBody Chambre chambre) {
+        Chambre savedChambre = chambreService.addChambre(chambre);
+        return mapToResponse(savedChambre);
     }
 
-    @GetMapping("getAll")
-    public List<Chambre> gettingAllChambre(){
-        return chambreService.getAllChambres();
+    @GetMapping
+    public List<ChambreResponse> getAllChambres() {
+        return chambreService.getAllChambres().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
-    @GetMapping("get")
-    public Chambre gettingChambre(@RequestParam("idChambre") long idChambre){
-        return chambreService.getChambreById(idChambre);
+    @GetMapping("/{idChambre}")
+    public ChambreResponse getChambre(@PathVariable("idChambre") long idChambre) {
+        Chambre chambre = chambreService.getChambreById(idChambre);
+        return mapToResponse(chambre);
     }
 
-    @DeleteMapping("delete/{idChambre}")
-    public void deletingChambre(@PathVariable("idChambre") long idChambre){
+    @DeleteMapping("/{idChambre}")
+    public void deleteChambre(@PathVariable("idChambre") long idChambre) {
         chambreService.deleteChambre(idChambre);
     }
 
-    @PutMapping("update")
-    public Chambre updatingChambre(@RequestBody Chambre chambre){
-        return chambreService.updateChambre(chambre);
+    @PutMapping("/{idChambre}")
+    public ChambreResponse updateChambre(@PathVariable("idChambre") long idChambre, @RequestBody Chambre chambre) {
+        chambre.setIdChambre(idChambre); // Assuming Chambre has an 'id' field to set
+        Chambre updatedChambre = chambreService.updateChambre(chambre);
+        return mapToResponse(updatedChambre);
     }
 
-    @GetMapping("get-par-nom-universite")
-    public List<Chambre>  getChambresParNomUniversite( String nomUniversite) {
-        return chambreService.getChambresParNomUniversite(nomUniversite);
-
+    @GetMapping("/universities/{nomUniversite}")
+    public List<ChambreResponse> getChambresByNomUniversite(@PathVariable("nomUniversite") String nomUniversite) {
+        return chambreService.getChambresParNomUniversite(nomUniversite).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
-    @GetMapping("get-par-bloc-type-keyword")
-    public List<Chambre> getChambresParBlocEtTypeKeyWord(@RequestParam("idBloc") long idBloc,@RequestParam("typeC") TypeChambre typeC) {
-        return getChambresParBlocEtTypeKeyWord(idBloc,typeC);
+    @GetMapping("/bloc/{idBloc}/type/{typeC}")
+    public List<ChambreResponse> getChambresByBlocAndType(@PathVariable("idBloc") long idBloc,
+            @PathVariable("typeC") TypeChambre typeC) {
+        return chambreService.getChambresParBlocEtTypeJPQL(idBloc, typeC).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
-    @GetMapping("get-par-bloc-type-jpql")
-    public List<Chambre> getChambresParBlocEtTypeJPQL(@RequestParam("idBloc") long idBloc,@RequestParam("typeC") TypeChambre typeC) {
-        return chambreService.getChambresParBlocEtTypeJPQL(idBloc,typeC);
+    @GetMapping("/non-reserve/universities/{nomUniversite}/type/{type}")
+    public List<ChambreResponse> getNonReservedChambres(@PathVariable("nomUniversite") String nomUniversite,
+            @PathVariable("type") TypeChambre type) {
+        return chambreService.getChambresNonReserveParNomUniversiteEtTypeChambre(nomUniversite, type).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
-    @GetMapping("get-non-reserve-par-nom-universite-typechambre")
-    public List<Chambre>  getChambresNonReserveParNomUniversiteEtTypeChambre( @RequestParam("nomUniversite") String nomUniversite,@RequestParam("type") TypeChambre type) {
-        return chambreService.getChambresNonReserveParNomUniversiteEtTypeChambre(nomUniversite,type);
+    private ChambreResponse mapToResponse(Chambre chambre) {
+        return new ChambreResponse(chambre.getIdChambre(), (int) chambre.getNumeroChambre(),
+                chambre.getTypeChambre().name());
     }
 }
