@@ -6,59 +6,74 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tn.esprit.tpfoyer17.dtos.BlocDTO;
 import tn.esprit.tpfoyer17.entities.Bloc;
 import tn.esprit.tpfoyer17.services.IBlocService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@RequestMapping("api/blocs")
-@Tag(name = "Gestion des Blocs",description = "les apis pour gérer tout les Bloc")
+@RequestMapping("/blocs")
+@Tag(name = "Gestion des Blocs", description = "les apis pour gérer tout les Bloc")
 public class BlocController {
     IBlocService blocService;
 
-    // Order 1
-    @Operation(description = "methode pour ajouter des blocs",summary = "ajouter un bloc",operationId = "1")
-    @PostMapping("add")
-    public Bloc addingBloc(@RequestBody Bloc bloc){
-        return blocService.addBloc(bloc);
+    @Operation(description = "methode pour ajouter des blocs", summary = "ajouter un bloc", operationId = "1")
+    @PostMapping
+    public ResponseEntity<BlocDTO> addingBloc(@RequestBody Bloc bloc) {
+        Bloc savedBloc = blocService.addBloc(bloc);
+        BlocDTO blocDTO = mapToDTO(savedBloc);
+        return ResponseEntity.status(201).body(blocDTO);
     }
 
-    // Order 2
-    @GetMapping("getAll")
-    public List<Bloc> gettingAllBloc(){
-        return blocService.getAllBlocs();
+    @GetMapping
+    public ResponseEntity<List<BlocDTO>> gettingAllBlocs() {
+        List<BlocDTO> blocDTOs = blocService.getAllBlocs()
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(blocDTOs);
     }
 
-    // Order 3
-    @GetMapping("get")
-    public Bloc gettingBloc(@RequestParam("idBloc") long idBloc){
-        return blocService.getBlocById(idBloc);
+    @GetMapping("/{id}")
+    public ResponseEntity<BlocDTO> gettingBloc(@PathVariable("id") long id) {
+        Bloc bloc = blocService.getBlocById(id);
+        BlocDTO blocDTO = mapToDTO(bloc);
+        return ResponseEntity.ok(blocDTO);
     }
 
-    // Order 4
-    @DeleteMapping("delete/{idBloc}")
-    public void deletingBloc(@PathVariable("idBloc") long idBloc){
-        blocService.deleteBloc(idBloc);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletingBloc(@PathVariable("id") long id) {
+        blocService.deleteBloc(id);
+        return ResponseEntity.noContent().build();
     }
 
-    // Order 5
-    @PutMapping("update")
-    public Bloc updatingBloc(@RequestBody Bloc bloc){
-        return blocService.updateBloc(bloc);
+    @PutMapping("/{id}")
+    public ResponseEntity<BlocDTO> updatingBloc(@PathVariable("id") long id, @RequestBody Bloc bloc) {
+        Bloc updatedBloc = blocService.updateBloc(bloc);
+        BlocDTO blocDTO = mapToDTO(updatedBloc);
+        return ResponseEntity.ok(blocDTO);
     }
 
-    // Order 6
-    @PutMapping("affecter-chambre-bloc")
-    public Bloc affecterChambresABloc(@RequestBody List<Long> numChambre,@RequestParam("idBloc") long idBloc){
-        return blocService.affecterChambresABloc(numChambre,idBloc);
+    @PutMapping("/{id}/affecter-chambre")
+    public ResponseEntity<BlocDTO> affecterChambresABloc(@PathVariable("id") long id,
+            @RequestBody List<Long> numChambre) {
+        Bloc updatedBloc = blocService.affecterChambresABloc(numChambre, id);
+        BlocDTO blocDTO = mapToDTO(updatedBloc);
+        return ResponseEntity.ok(blocDTO);
     }
 
-
-
-
+    private BlocDTO mapToDTO(Bloc bloc) {
+        return BlocDTO.builder()
+                .id(bloc.getIdBloc())
+                .nomBloc(bloc.getNomBloc())
+                .capaciteBloc(bloc.getCapaciteBloc())
+                .build();
+    }
 }
