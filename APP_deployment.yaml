@@ -35,7 +35,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: foyer-ap
+    app: foyer-app
   ports:
     - protocol: TCP
       port: 8080
