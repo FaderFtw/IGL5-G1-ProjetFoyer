@@ -3,7 +3,7 @@ version: "3.8"
 services:
   db:
     image: mysql:8.0
-    container_name: mysql-db
+    container_name: my-db
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: tpFoyer17
@@ -43,18 +43,18 @@ services:
     depends_on:
       - springboot-app
 
-  # nginx:
-  #   image: nginx:alpine
-  #   container_name: nginx-proxy
-  #   ports:
-  #     - "80:80"
-  #   volumes:
-  #     - ./nginx.conf:/etc/nginx/nginx.conf
-  #   depends_on:
-  #     - frontend
-  #     - springboot-app
-  #   networks:
-  #     - app-network
+  nginx:
+     image: nginx:alpine
+     container_name: nginx-proxy
+     ports:
+       - "80:80"
+     volumes:
+       - ./nginx.conf:/etc/nginx/nginx.conf
+     depends_on:
+       - frontend
+       - springboot-app
+     networks:
+       - app-network
 
 networks:
   app-network:

@@ -1,0 +1,32 @@
+<jmeterTestPlan version="1.2" properties="2.1" jmeter="5.5">
+    <hashTree>
+        <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Sample Test Plan" enabled="true">
+            <stringProp name="TestPlan.comments"></stringProp>
+            <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+                <collectionProp name="Arguments.arguments"/>
+            </elementProp>
+            <boolProp name="TestPlan.functional_mode">false</boolProp>
+            <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+            <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+        </TestPlan>
+        <hashTree>
+            <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Sample Thread Group" enabled="true">
+                <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+                    <intProp name="LoopController.loops">1</intProp>
+                </elementProp>
+                <stringProp name="ThreadGroup.num_threads">10</stringProp>
+                <stringProp name="ThreadGroup.ramp_time">5</stringProp>
+                <boolProp name="ThreadGroup.scheduler">false</boolProp>
+                <stringProp name="ThreadGroup.duration"></stringProp>
+            </ThreadGroup>
+            <hashTree>
+                <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request" enabled="true">
+                    <stringProp name="HTTPSampler.domain">springboot-app/tpFoyer17</stringProp>
+                    <stringProp name="HTTPSampler.port">8080</stringProp>
+                    <stringProp name="HTTPSampler.path">/universites</stringProp>
+                    <stringProp name="HTTPSampler.method">GET</stringProp>
+                </HTTPSamplerProxy>
+            </hashTree>
+        </hashTree>
+    </hashTree>
+</jmeterTestPlan>

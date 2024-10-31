@@ -92,6 +92,15 @@ pipeline {
             }
         }
 
+        stage('Performance Testing with JMeter') {
+            steps {
+                script {
+                    sh 'jmeter -n -t testplan.jmx -l results.jtl'
+                    archiveArtifacts artifacts: 'results.jtl', allowEmptyArchive: true
+                }
+            }
+        }
+
         stage('Test AWS Credentials') {
             steps {
                 withCredentials([file(credentialsId: awsCredentialsId, variable: 'AWS_CREDENTIALS_FILE')]) {
