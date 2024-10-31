@@ -39,7 +39,7 @@ public class FoyerService implements IFoyerService{
         if (foyerOptional.isPresent()) {
             return foyerOptional.get();
         } else {
-            throw new NoSuchElementException("Foyer with ID " + idFoyer + " not found.");
+            throw new EntityNotFoundException("Foyer with ID " + idFoyer + " not found.");
         }
     }
     @Override

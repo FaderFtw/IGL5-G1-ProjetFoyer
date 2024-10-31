@@ -122,6 +122,24 @@ public class UniversiteServiceTest {
     }
 
     @Test
+    public void testAffecterFoyerAUniversite_UniversiteNotFound() {
+        long idFoyer = 1L;
+        String nomUniversite = "NonExistentUniversity";
+
+        when(universiteRepository.findByNomUniversite(nomUniversite)).thenReturn(null);
+
+        Exception exception = assertThrows(EntityNotFoundException.class, () -> {
+            universiteService.affecterFoyerAUniversite(idFoyer, nomUniversite);
+        });
+
+        assertEquals("Universite with name " + nomUniversite + " not Found", exception.getMessage());
+        verify(universiteRepository, times(1)).findByNomUniversite(nomUniversite);
+        verify(foyerRepository, never()).findById(anyLong());
+        verify(universiteRepository, never()).save(any(Universite.class));
+    }
+
+
+    @Test
     public void testDesaffecterFoyerAUniversite() {
         long idUniversite = 1L;
         Universite mockUniversite = new Universite();

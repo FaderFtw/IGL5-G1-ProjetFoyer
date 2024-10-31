@@ -40,7 +40,7 @@ public class BlocService implements IBlocService{
         if (blocOptional.isPresent()) {
             return blocOptional.get();
         } else {
-            throw new NoSuchElementException("Bloc with ID " + idBloc + " not found.");
+            throw new EntityNotFoundException("Bloc with ID " + idBloc + " not found.");
         }
     }
     @Override
