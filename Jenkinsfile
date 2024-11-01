@@ -137,6 +137,7 @@ pipeline {
             }
         }
 
+        /* A lancer une seule fois pour chaque AWS session*/
         stage('Install Prometheus Stack') {
             steps {
                 script {
@@ -159,6 +160,33 @@ pipeline {
                     sh "kubectl apply -f APP_deployment.yaml"
                     sh "kubectl apply -f FRONT_deployment.yaml"
                     sh "kubectl apply -f NGINX_deployment.yaml"
+                }
+            }
+        }
+
+        stage('Performance Testing with JMeter') {
+            steps {
+                script {
+                    // Retrieve the IP address of a node dynamically
+                    def nodeIp = sh(
+                        script: "kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type==\"ExternalIP\")].address}'",
+                        returnStdout: true
+                    ).trim()
+
+                    // Retrieve the NodePort for the nginx-service dynamically
+                    def port = sh(
+                        script: "kubectl get svc nginx-service -o jsonpath='{.spec.ports[0].nodePort}'",
+                        returnStdout: true
+                    ).trim()
+
+                    def duration = "60"  // Test duration in seconds
+
+                    echo "Using node IP: ${nodeIp} for JMeter testing"
+
+                    sh """
+                    jmeter -n -t testplan.jmx \
+                        -Jdomain=${nodeIp} -Jport=${port} -Jduration=${duration}
+                    """
                 }
             }
         }
