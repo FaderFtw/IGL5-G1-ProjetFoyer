@@ -16,14 +16,14 @@
                 </elementProp>
                 <stringProp name="ThreadGroup.num_threads">10</stringProp>
                 <stringProp name="ThreadGroup.ramp_time">5</stringProp>
-                <boolProp name="ThreadGroup.scheduler">false</boolProp>
-                <stringProp name="ThreadGroup.duration"></stringProp>
+                <boolProp name="ThreadGroup.scheduler">true</boolProp>
+                <stringProp name="ThreadGroup.duration">${__P(duration,60)}</stringProp>
             </ThreadGroup>
             <hashTree>
                 <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request" enabled="true">
-                    <stringProp name="HTTPSampler.domain">springboot-app/tpFoyer17</stringProp>
-                    <stringProp name="HTTPSampler.port">8080</stringProp>
-                    <stringProp name="HTTPSampler.path">/universites</stringProp>
+                    <stringProp name="HTTPSampler.domain">${__P(domain)}</stringProp>
+                    <stringProp name="HTTPSampler.port">${__P(port)}</stringProp>
+                    <stringProp name="HTTPSampler.path">/tpFoyer17/universites</stringProp>
                     <stringProp name="HTTPSampler.method">GET</stringProp>
                 </HTTPSamplerProxy>
             </hashTree>
