@@ -1,5 +1,6 @@
 pipeline {
     environment {
+        git_branch = 'main'
         registry = "fadyzaafrane/tpfoyer-17"
         registryCredential = 'dockerhub_id'
         dockerImage = ''
@@ -16,7 +17,9 @@ pipeline {
     stages {
         stage('CHECKOUT GIT') {
             steps {
-                git branch: "develop", url:'https://github.com/FaderFtw/IGL5-G1-ProjetFoyer'
+                script {
+                    git branch: env.git_branch, url: 'https://github.com/FaderFtw/IGL5-G1-ProjetFoyer'
+                }
             }
         }
 
@@ -55,7 +58,13 @@ pipeline {
 
         stage("PUBLISH TO NEXUS") {
             steps {
-                sh 'mvn deploy -s /var/jenkins_home/.m2/settings.xml'
+                script {
+                    if (env.GIT_BRANCH == 'develop') {
+                        sh 'mvn deploy -s /var/jenkins_home/.m2/settings.xml -DaltDeploymentRepository=snapshotRepo::default::http://nexus:8081/repository/maven-snapshots/'
+                    } else if (env.GIT_BRANCH == 'main') {
+                        sh 'mvn deploy -s /var/jenkins_home/.m2/settings.xml -DaltDeploymentRepository=releaseRepo::default::http://nexus:8081/repository/maven-releases/'
+                    }
+                }
             }
         }
 
