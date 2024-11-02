@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import tn.esprit.tpfoyer17.entities.Foyer;
 import tn.esprit.tpfoyer17.entities.Universite;
 import tn.esprit.tpfoyer17.repositories.FoyerRepository;
 import tn.esprit.tpfoyer17.repositories.UniversiteRepository;
@@ -50,13 +51,23 @@ public class UniversiteService implements IUniversiteService{
     @Override
     public Universite affecterFoyerAUniversite(long idFoyer, String nomUniversite) {
         Universite universite = universiteRepository.findByNomUniversite(nomUniversite);
-        universite.setFoyer(foyerRepository.findById(idFoyer).get());
+        if (universite == null) {
+            throw new EntityNotFoundException("Universite with name " + nomUniversite + " not Found");
+        }
+
+        Foyer foyer = foyerRepository.findById(idFoyer)
+                .orElseThrow(() -> new EntityNotFoundException("Foyer with ID " + idFoyer + " not found"));
+
+        universite.setFoyer(foyer);
         return universiteRepository.save(universite);
     }
 
+
     @Override
     public Universite desaffecterFoyerAUniversite(long idUniversite) {
-        Universite universite = universiteRepository.findById(idUniversite).get();
+        Universite universite = universiteRepository.findById(idUniversite)
+                .orElseThrow(() -> new EntityNotFoundException("Universite with ID " + idUniversite + " not Found"));
+
         universite.setFoyer(null);
         return universiteRepository.save(universite);
     }

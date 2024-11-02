@@ -1,11 +1,18 @@
 pipeline {
-    environment {
+     environment {
         git_branch = 'main'
-        registry = "fadyzaafrane/tpfoyer-17"
+
+        registry = "fadyzaafrane/tpfoyer-17"  // Replace with your Docker Hub username
         registryCredential = 'dockerhub_id'
         dockerImage = ''
+        imageTag = 'latest'
+
         kubeConfigCredentialId = 'kubeCredentials'
         awsCredentialsId = 'awsCredentials'
+        awsRegion = 'us-east-1'
+        clusterName = 'KubeCluster'
+
+        emailRecipient = 'fady.zaafrane@gmail.com'  // Add your email here
     }
 
     agent any
@@ -43,7 +50,6 @@ pipeline {
             }
         }
 
-
         stage('MVN SONARQUBE'){
             steps {
                  script {
@@ -55,23 +61,22 @@ pipeline {
             }
         }
 
-
         stage("PUBLISH TO NEXUS") {
-           steps {
-               script {
-                   if (env.GIT_BRANCH == 'develop') {
-                       sh '''
-                           mvn deploy -s /var/jenkins_home/.m2/settings.xml \
-                           -DaltDeploymentRepository=snapshotRepo::default::http://nexus:8081/repository/maven-snapshots/
-                       '''
-                   } else if (env.GIT_BRANCH == 'main') {
-                       sh '''
-                           mvn deploy -s /var/jenkins_home/.m2/settings.xml \
-                           -DaltDeploymentRepository=releaseRepo::default::http://nexus:8081/repository/maven-releases/
-                       '''
-                   }
-               }
-           }
+            steps {
+                script {
+                    if (env.git_branch == 'develop') {
+                        sh '''
+                            mvn deploy -s /var/jenkins_home/.m2/settings.xml \
+                            -DaltDeploymentRepository=snapshotRepo::default::http://nexus:8081/repository/maven-snapshots/
+                        '''
+                    } else if (env.git_branch == 'main') {
+                        sh '''
+                            mvn deploy -s /var/jenkins_home/.m2/settings.xml \
+                            -DaltDeploymentRepository=releaseRepo::default::http://nexus:8081/repository/maven-releases/
+                        '''
+                    }
+                }
+            }
         }
 
         stage('BUILDING OUR IMAGE') {
@@ -105,6 +110,15 @@ pipeline {
             }
         }
 
+        stage('Performance Testing with JMeter') {
+            steps {
+                script {
+                    sh 'jmeter -n -t testplan.jmx -l results.jtl'
+                    archiveArtifacts artifacts: 'results.jtl', allowEmptyArchive: true
+                }
+            }
+        }
+
         stage('Test AWS Credentials') {
             steps {
                 withCredentials([file(credentialsId: awsCredentialsId, variable: 'AWS_CREDENTIALS_FILE')]) {
@@ -121,26 +135,108 @@ pipeline {
             }
         }
 
-        // Stage to deploy on Kubernetes
-        stage('DEPLOY TO AWS KUBERNETES') {
+        stage('Terraform Setup') {
             steps {
                 script {
-                    // Inject kubeconfig and AWS credentials
-                    withCredentials([file(credentialsId: kubeConfigCredentialId, variable: 'KUBECONFIG'),
-                                     file(credentialsId: awsCredentialsId, variable: 'AWS_CREDENTIALS_FILE')]) {
-                        // Test AWS Credentials
-                        sh 'aws sts get-caller-identity' // Ensure AWS CLI can access the credentials
-
-                        // Print kubeconfig content for debugging (optional)
-                        echo "Kubeconfig content: ${readFile(env.KUBECONFIG).trim()}"
-
-                        // Deploy to Kubernetes using the specified kubeconfig
-                        sh "kubectl --kubeconfig=${env.KUBECONFIG} apply -f deployment.yaml"
-
-                        sh "kubectl --kubeconfig=${env.KUBECONFIG} apply -f service.yaml"
+                    dir('terraform') { // Change to the terraform subdirectory
+                        sh '''
+                            terraform init
+                            terraform validate
+                            terraform apply -auto-approve
+                        '''
                     }
                 }
             }
+        }
+
+        stage('Get Cluster Credentials') {
+            steps {
+                sh "aws eks --region ${env.awsRegion} update-kubeconfig --name ${env.clusterName}"
+            }
+        }
+
+        /* A lancer une seule fois pour chaque AWS session*/
+        stage('Install Prometheus Stack') {
+            steps {
+                script {
+                    sh 'helm repo add prometheus-community https://prometheus-community.github.io/helm-charts'
+                    sh 'helm repo update'
+                    sh 'helm install mon prometheus-community/kube-prometheus-stack'
+                }
+            }
+        }
+
+        stage('DEPLOY TO AWS KUBERNETES') {
+            steps {
+                script {
+                    sh """
+                    sed -i 's|image: .*|image: ${registry}:${imageTag}|' APP_deployment.yaml
+                    cat APP_deployment.yaml
+                    """
+                    sh "kubectl apply -f DB_deployment.yaml"
+                    sh "kubectl rollout status deployment/my-db"
+                    sh "kubectl apply -f APP_deployment.yaml"
+                    sh "kubectl apply -f FRONT_deployment.yaml"
+                    sh "kubectl apply -f NGINX_deployment.yaml"
+                }
+            }
+        }
+
+        stage('Performance Testing with JMeter') {
+            steps {
+                script {
+                    // Retrieve the IP address of a node dynamically
+                    def nodeIp = sh(
+                        script: "kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type==\"ExternalIP\")].address}'",
+                        returnStdout: true
+                    ).trim()
+
+                    // Retrieve the NodePort for the nginx-service dynamically
+                    def port = sh(
+                        script: "kubectl get svc nginx-service -o jsonpath='{.spec.ports[0].nodePort}'",
+                        returnStdout: true
+                    ).trim()
+
+                    def duration = "60"  // Test duration in seconds
+
+                    echo "Using node IP: ${nodeIp} for JMeter testing"
+
+                    sh """
+                    jmeter -n -t testplan.jmx \
+                        -Jdomain=${nodeIp} -Jport=${port} -Jduration=${duration}
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            emailext (
+                subject: "SUCCESS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+                body: "Good news! The build for ${env.JOB_NAME} [${env.BUILD_NUMBER}] succeeded.\n\nCheck it here: ${env.BUILD_URL}",
+                to: "${env.emailRecipient}"
+            )
+        }
+
+        failure {
+            emailext (
+                subject: "FAILURE: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+                body: "Oops! The build for ${env.JOB_NAME} [${env.BUILD_NUMBER}] failed.\n\nCheck the details: ${env.BUILD_URL}",
+                to: "${env.emailRecipient}"
+            )
+        }
+
+        unstable {
+            emailext (
+                subject: "UNSTABLE: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+                body: "Attention! The build for ${env.JOB_NAME} [${env.BUILD_NUMBER}] is unstable.\n\nCheck it here: ${env.BUILD_URL}",
+                to: "${env.emailRecipient}"
+            )
+        }
+
+        always {
+            echo 'Sending email notification...'
         }
     }
 }

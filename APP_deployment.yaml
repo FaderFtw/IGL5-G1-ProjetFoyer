@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foyer-app
+  labels:
+    app: foyer-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: foyer-app
+  template:
+    metadata:
+      labels:
+        app: foyer-app
+    spec:
+      containers:
+        - name: foyer-app
+          image: ${registry}:${IMAGE_TAG}
+          ports:
+            - containerPort: 8080
+          env:  # Add environment variables here
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://my-db:3306/tpFoyer17
+            - name: SPRING_DATASOURCE_USERNAME
+              value: root
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: root
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-boot-service
+spec:
+  type: ClusterIP
+  selector:
+    app: foyer-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
