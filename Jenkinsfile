@@ -1,13 +1,17 @@
 pipeline {
-    environment {
+     environment {
+        git_branch = 'main'
+
         registry = "fadyzaafrane/tpfoyer-17"  // Replace with your Docker Hub username
         registryCredential = 'dockerhub_id'
         dockerImage = ''
+        imageTag = 'latest'
+
         kubeConfigCredentialId = 'kubeCredentials'
         awsCredentialsId = 'awsCredentials'
-        imageTag = 'latest'
         awsRegion = 'us-east-1'
         clusterName = 'KubeCluster'
+
         emailRecipient = 'fady.zaafrane@gmail.com'  // Add your email here
     }
 
@@ -20,7 +24,9 @@ pipeline {
     stages {
         stage('CHECKOUT GIT') {
             steps {
-                git branch: "develop", url:'https://github.com/FaderFtw/IGL5-G1-ProjetFoyer'
+                script {
+                    git branch: env.git_branch, url: 'https://github.com/FaderFtw/IGL5-G1-ProjetFoyer'
+                }
             }
         }
 
@@ -57,7 +63,19 @@ pipeline {
 
         stage("PUBLISH TO NEXUS") {
             steps {
-                sh 'mvn deploy -s /var/jenkins_home/.m2/settings.xml'
+                script {
+                    if (env.git_branch == 'develop') {
+                        sh '''
+                            mvn deploy -s /var/jenkins_home/.m2/settings.xml \
+                            -DaltDeploymentRepository=snapshotRepo::default::http://nexus:8081/repository/maven-snapshots/
+                        '''
+                    } else if (env.git_branch == 'main') {
+                        sh '''
+                            mvn deploy -s /var/jenkins_home/.m2/settings.xml \
+                            -DaltDeploymentRepository=releaseRepo::default::http://nexus:8081/repository/maven-releases/
+                        '''
+                    }
+                }
             }
         }
 
