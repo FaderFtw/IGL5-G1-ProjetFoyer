@@ -93,10 +93,15 @@
     </build>
 
     <distributionManagement>
-        <repository>
-            <id>deploymentRepo</id>
-            <name>Foyer Repository</name>
+        <snapshotRepository>
+            <id>snapshotRepo</id>
+            <name>Foyer Snapshot Repository</name>
             <url>http://nexus:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>releaseRepo</id>
+            <name>Foyer Release Repository</name>
+            <url>http://nexus:8081/repository/maven-releases/</url>
         </repository>
     </distributionManagement>
 </project>
