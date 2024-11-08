@@ -18,6 +18,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        VERSION: ${VERSION}
     container_name: springboot-app
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/tpFoyer17
