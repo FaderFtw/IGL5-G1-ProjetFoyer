@@ -39,17 +39,14 @@ services:
       - springboot-app
 
   nginx:
-    image: nginx:alpine
+    image: fadyzaafrane/nginx-tpfoyer17:latest
     ports:
       - "80:80"
-    volumes:
-      - ./nginx.conf:/tmp/nginx.conf
     depends_on:
       - frontend
       - springboot-app
     networks:
       - app-network
-    entrypoint: [ "/bin/sh", "-c", "cp /tmp/nginx.conf /etc/nginx/nginx.conf && nginx -g 'daemon off;'" ]
 
 networks:
   app-network:
