@@ -1,0 +1,42 @@
+frontend:
+  replicaCount: 2
+  image:
+    repository: alaabrahim/foyer-frontend
+    tag: latest
+  service:
+    port: 3000
+
+backend:
+  replicaCount: 2
+  image:
+    repository: ${registry}:${IMAGE_TAG}
+    tag: latest
+  service:
+    port: 8080
+  env:
+    SPRING_DATASOURCE_URL: jdbc:mysql://my-db:3306/tpFoyer17
+    SPRING_DATASOURCE_USERNAME: root
+    SPRING_DATASOURCE_PASSWORD: root
+
+db:
+  replicaCount: 1
+  image:
+    repository: mysql
+    tag: "8.0"
+  service:
+    port: 3306
+  env:
+    MYSQL_ROOT_PASSWORD: root
+    MYSQL_DATABASE: tpFoyer17
+
+reverse:
+  nginx:
+    image:
+      repository: nginx
+      tag: alpine
+    service:
+      type: NodePort
+      port: 80
+      nodePort: 30000
+  frontendServiceName: frontend-service
+  backendServiceName: spring-boot-service

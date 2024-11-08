@@ -1,0 +1,4 @@
+apiVersion: v2
+name: db
+description: Database service chart (MySQL)
+version: 0.1.0

@@ -1,0 +1,18 @@
+apiVersion: v2
+name: full-stack
+description: A Helm chart that deploys frontend, backend, database, and reverse proxy together.
+version: 0.1.0
+
+dependencies:
+  - name: frontend
+    version: 0.1.0
+    repository: "file://charts/frontend"
+  - name: backend
+    version: 0.1.0
+    repository: "file://charts/backend"
+  - name: db
+    version: 0.1.0
+    repository: "file://charts/db"
+  - name: reverse
+    version: 0.1.0
+    repository: "file://charts/reverse"

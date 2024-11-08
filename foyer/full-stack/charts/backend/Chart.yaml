@@ -1,0 +1,4 @@
+apiVersion: v2
+name: backend
+description: Backend service chart (Spring Boot app)
+version: 0.1.0
