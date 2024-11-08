@@ -47,12 +47,13 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx.conf:/tmp/nginx.conf
     depends_on:
       - frontend
       - springboot-app
     networks:
       - app-network
+    entrypoint: [ "/bin/sh", "-c", "cp /tmp/nginx.conf /etc/nginx/nginx.conf && nginx -g 'daemon off;'" ]
 
 networks:
   app-network:
