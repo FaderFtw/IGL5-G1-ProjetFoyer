@@ -1,0 +1,14 @@
+replicaCount: 2
+image:
+  repository: alaabrahim/foyer-backend
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+env:
+  SPRING_DATASOURCE_URL: jdbc:mysql://my-db:3306/tpFoyer17
+  SPRING_DATASOURCE_USERNAME: root
+  SPRING_DATASOURCE_PASSWORD: root
