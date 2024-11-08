@@ -1,0 +1,4 @@
+apiVersion: v2
+name: reverse
+description: Helm chart for NGINX reverse proxy
+version: 0.1.0

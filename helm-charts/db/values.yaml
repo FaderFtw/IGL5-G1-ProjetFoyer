@@ -1,0 +1,21 @@
+replicaCount: 1
+image:
+  repository: mysql
+  tag: "8.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3306
+
+mysql:
+  rootPassword: root
+  database: tpFoyer17
+
+# Uncomment the following lines if using persistent storage
+# persistence:
+#   enabled: true
+#   storageClass: ""
+#   accessModes:
+#     - ReadWriteOnce
+#   size: 1Gi
