@@ -3,7 +3,6 @@ version: "3.8"
 services:
   db:
     image: mysql:8.0
-    container_name: my-db
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: tpFoyer17
@@ -16,7 +15,6 @@ services:
 
   springboot-app:
     image: ${registry}:${IMAGE_TAG}
-    container_name: springboot-app
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/tpFoyer17
       SPRING_DATASOURCE_USERNAME: root
@@ -33,7 +31,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: react-frontend
     environment:
       - NODE_ENV=production
     networks:
@@ -43,7 +40,6 @@ services:
 
   nginx:
     image: nginx:alpine
-    container_name: nginx-proxy
     ports:
       - "80:80"
     volumes:
