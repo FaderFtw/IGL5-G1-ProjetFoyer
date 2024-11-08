@@ -5,45 +5,64 @@ import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import tn.esprit.tpfoyer17.dtos.FoyerDTO;
 import tn.esprit.tpfoyer17.entities.Foyer;
 import tn.esprit.tpfoyer17.services.IFoyerService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@RequestMapping("api/foyers")
+@RequestMapping("/foyers") // Changed the base path to use a leading slash
 public class FoyerController {
     IFoyerService foyerService;
 
-    @PostMapping("add")
-    public Foyer addingFoyer(@RequestBody Foyer foyer){
-        return foyerService.addFoyer(foyer);
-    }
-    @GetMapping("getAll")
-    public List<Foyer> gettingAllFoyer(){
-        return foyerService.getAllFoyers();
+    @PostMapping
+    public FoyerDTO addFoyer(@RequestBody Foyer foyer) {
+        Foyer createdFoyer = foyerService.addFoyer(foyer);
+        return mapToDTO(createdFoyer);
     }
 
-    @GetMapping("get")
-    public Foyer gettingFoyer(@RequestParam("idFoyer") long idFoyer){
-        return foyerService.getFoyerById(idFoyer);
+    @GetMapping
+    public List<FoyerDTO> getAllFoyers() {
+        return foyerService.getAllFoyers().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
-    @DeleteMapping("delete/{idFoyer}")
-    public void deletingFoyer(@PathVariable("idFoyer") long idFoyer){
+    @GetMapping("/{idFoyer}")
+    public FoyerDTO getFoyer(@PathVariable("idFoyer") long idFoyer) {
+        Foyer foyer = foyerService.getFoyerById(idFoyer);
+        return mapToDTO(foyer);
+    }
+
+    @DeleteMapping("/{idFoyer}")
+    public void deleteFoyer(@PathVariable("idFoyer") long idFoyer) {
         foyerService.deleteFoyer(idFoyer);
     }
 
-    @PutMapping("update")
-    public Foyer updatingFoyer(@RequestBody Foyer foyer){
-        return foyerService.updateFoyer(foyer);
-    }
-    @PostMapping("ajouter-affecter")
-    Foyer ajouterFoyerEtAffecterAUniversite (@RequestBody Foyer foyer, @RequestParam("idUniversite") long idUniversite){
-        return foyerService.ajouterFoyerEtAffecterAUniversite(foyer,idUniversite);
+    @PutMapping
+    public FoyerDTO updateFoyer(@RequestBody Foyer foyer) {
+        Foyer updatedFoyer = foyerService.updateFoyer(foyer);
+        return mapToDTO(updatedFoyer);
     }
 
+    @PostMapping("/affect")
+    public FoyerDTO addFoyerAndAssignToUniversity(@RequestBody Foyer foyer,
+            @RequestParam("idUniversite") long idUniversite) {
+        Foyer createdFoyer = foyerService.ajouterFoyerEtAffecterAUniversite(foyer, idUniversite);
+        return mapToDTO(createdFoyer);
+    }
+
+    private FoyerDTO mapToDTO(Foyer foyer) {
+        return FoyerDTO.builder()
+                .id(foyer.getIdFoyer())
+                .nomFoyer(foyer.getNomFoyer())
+                .capaciteFoyer(foyer.getCapaciteFoyer())
+                .build();
+    }
 }

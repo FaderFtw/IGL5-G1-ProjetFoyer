@@ -1,5 +1,6 @@
 package tn.esprit.tpfoyer17.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -68,14 +69,18 @@ class BlocServiceTest {
     }
 
     @Test
-    void testGetBlocById_NotFound() {
+    void testGetBlocById_NotFoundThrowsException() {
         long idBloc = 1L;
         when(blocRepository.findById(idBloc)).thenReturn(Optional.empty());
 
-        Optional<Bloc> result = blocRepository.findById(idBloc);
-        assertTrue(result.isEmpty());
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+            blocService.getBlocById(idBloc);
+        });
+
+        assertEquals("Bloc with ID " + idBloc + " not found.", exception.getMessage());
         verify(blocRepository, times(1)).findById(idBloc);
     }
+
 
     @Test
     void testDeleteBloc() {
@@ -122,4 +127,21 @@ class BlocServiceTest {
         verify(chambreRepository, times(1)).findAllById(chambreIds);
         verify(blocRepository, times(1)).save(mockBloc);
     }
+
+    @Test
+    void testAffecterChambresABloc_BlocNotFound() {
+        long idBloc = 1L;
+        List<Long> chambreIds = List.of(1L, 2L, 3L);
+
+        when(blocRepository.findById(idBloc)).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+            blocService.affecterChambresABloc(chambreIds, idBloc);
+        });
+
+        assertEquals("Bloc with ID " + idBloc + " not found", exception.getMessage());
+        verify(blocRepository, times(1)).findById(idBloc);
+        verify(chambreRepository, never()).findAllById(anyList());
+    }
+
 }
