@@ -14,7 +14,7 @@ backend:
   service:
     port: 8080
   env:
-    SPRING_DATASOURCE_URL: jdbc:mysql://my-db:3306/tpFoyer17
+    SPRING_DATASOURCE_URL: jdbc:mysql://full-stack-db:3306/tpFoyer17
     SPRING_DATASOURCE_USERNAME: root
     SPRING_DATASOURCE_PASSWORD: root
 
@@ -40,3 +40,11 @@ reverse:
       nodePort: 30000
   frontendServiceName: frontend-service
   backendServiceName: spring-boot-service
+  nginxConfig:
+    listenPort: 80
+    proxyBackendPath: "/tpFoyer17/"
+    proxyBackendURL: "http://full-stack-backend:8080"
+    proxyFrontendPath: "/"
+    proxyFrontendURL: "http://full-stack-frontend-service:3000"
+
+# TODO: Fix helm release name hardcoding

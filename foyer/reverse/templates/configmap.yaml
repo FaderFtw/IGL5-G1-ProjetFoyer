@@ -8,10 +8,10 @@ data:
 
     http {
         server {
-            listen {{ .Values.nginx.nginxConfig.listenPort }};
+            listen {{ .Values.nginxConfig.listenPort }};
 
-            location {{ .Values.nginx.nginxConfig.proxyBackendPath }} {
-                proxy_pass {{ .Values.nginx.nginxConfig.proxyBackendURL }};
+            location {{ .Values.nginxConfig.proxyBackendPath }} {
+                proxy_pass {{ .Values.nginxConfig.proxyBackendURL }};
                 proxy_set_header Host $host;
                 proxy_set_header X-Real-IP $remote_addr;
                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -19,8 +19,8 @@ data:
                 proxy_set_header Accept "application/json";  # Force backend to respond with JSON
             }
 
-            location {{ .Values.nginx.nginxConfig.proxyFrontendPath }} {
-                proxy_pass {{ .Values.nginx.nginxConfig.proxyFrontendURL }};
+            location {{ .Values.nginxConfig.proxyFrontendPath }} {
+                proxy_pass {{ .Values.nginxConfig.proxyFrontendURL }};
                 proxy_set_header Host $host;
                 proxy_set_header X-Real-IP $remote_addr;
                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

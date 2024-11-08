@@ -6,13 +6,13 @@ version: 0.1.0
 dependencies:
   - name: frontend
     version: 0.1.0
-    repository: "file://charts/frontend"
+    repository: "file://../frontend" 
   - name: backend
     version: 0.1.0
-    repository: "file://charts/backend"
+    repository: "file://../backend" 
   - name: db
     version: 0.1.0
-    repository: "file://charts/db"
+    repository: "file://../db"  
   - name: reverse
     version: 0.1.0
-    repository: "file://charts/reverse"
+    repository: "file://../reverse"  

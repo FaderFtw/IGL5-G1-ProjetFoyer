@@ -1,30 +1,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: { { include "db.fullname" . } }
+  name: {{ include "db.fullname" . }}
   labels:
-    app: { { include "db.name" . } }
+    app: {{ include "db.name" . }}
 spec:
-  replicas: { { .Values.replicaCount } }
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: { { include "db.name" . } }
+      app: {{ include "db.name" . }}
   template:
     metadata:
       labels:
-        app: { { include "db.name" . } }
+        app: {{ include "db.name" . }}
     spec:
       containers:
-        - name: { { include "db.name" . } }
+        - name: {{ include "db.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: { { .Values.image.pullPolicy } }
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: MYSQL_ROOT_PASSWORD
-              value: { { .Values.mysql.rootPassword } }
+              value: {{ .Values.mysql.rootPassword }}
             - name: MYSQL_DATABASE
-              value: { { .Values.mysql.database } }
+              value: {{ .Values.mysql.database }}
           ports:
-            - containerPort: { { .Values.service.port } }
+            - containerPort: {{ .Values.service.port }}
           # Uncomment the following lines if using persistent storage
           # volumeMounts:
           #   - name: mysql-data
