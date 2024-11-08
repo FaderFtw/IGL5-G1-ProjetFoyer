@@ -80,11 +80,13 @@ pipeline {
         }
 
         stage('BUILDING OUR IMAGE') {
-            steps {
-                script {
-                    dockerImage = docker.build registry + ":$BUILD_NUMBER"
-                }
-            }
+                    steps {
+                        script {
+                            def version = sh(script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true).trim()
+                            //echo version
+                            dockerImage = docker.build("${registry}:${imageTag}", "--build-arg VERSION=${version} .")
+                        }
+                    }
         }
 
         stage('DEPLOY OUR IMAGE') {
@@ -98,17 +100,21 @@ pipeline {
         }
 
         stage('Docker Compose Up') {
-            steps {
-                script {
-                    def imageTag = "latest"
-                    sh """
-                    export IMAGE_TAG=${imageTag}
-                    export registry=${registry}
-                    docker-compose up -d
-                    """
+                    steps {
+                        script {
+                              def version = sh(script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true).trim()
+                              def imageTag = "latest"
+
+                              sh """
+                              export VERSION=${version}
+                              export IMAGE_TAG=${imageTag}
+                              export registry=${registry}
+                              docker-compose down
+                              docker-compose up -d
+                              """
+                        }
+                    }
                 }
-            }
-        }
 
         stage('Performance Testing with JMeter') {
             steps {
