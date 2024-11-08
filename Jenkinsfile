@@ -6,8 +6,6 @@ pipeline {
         registryCredential = 'dockerhub_id'
         dockerImage = ''
         imageTag = 'latest'
-
-        kubeConfigCredentialId = 'kubeCredentials'
         awsCredentialsId = 'awsCredentials'
         awsRegion = 'us-east-1'
         clusterName = 'KubeCluster'
