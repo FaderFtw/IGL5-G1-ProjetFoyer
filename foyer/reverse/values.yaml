@@ -1,0 +1,19 @@
+nginx:
+  image:
+    repository: nginx
+    tag: "alpine"
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  service:
+    type: NodePort
+    port: 80
+    nodePort: 30000
+
+frontendServiceName: frontend-service
+backendServiceName: spring-boot-service
+nginxConfig:
+  listenPort: 80
+  proxyBackendPath: "/tpFoyer17/"
+  proxyBackendURL: "http://{{ .Values.backendServiceName }}:8080"
+  proxyFrontendPath: "/"
+  proxyFrontendURL: "http://{{ .Values.frontendServiceName }}:3000"
