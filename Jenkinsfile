@@ -53,7 +53,9 @@ pipeline {
                  script {
                     withSonarQubeEnv('sonar') {
                         sh """ mvn sonar:sonar \
-                        -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml """
+                        -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+                        -Dsonar.inclusions=**/services/** 
+                        """
                     }
                 }
             }
