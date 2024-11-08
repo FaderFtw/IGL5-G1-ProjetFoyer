@@ -163,18 +163,10 @@ pipeline {
             }
         }
 
-        stage('DEPLOY TO AWS KUBERNETES') {
+        stage('DEPLOY TO AWS KUBERNETES using helm') {
             steps {
                 script {
-                    sh """
-                    sed -i 's|image: .*|image: ${registry}:${imageTag}|' APP_deployment.yaml
-                    cat APP_deployment.yaml
-                    """
-                    sh "kubectl apply -f DB_deployment.yaml"
-                    sh "kubectl rollout status deployment/my-db"
-                    sh "kubectl apply -f APP_deployment.yaml"
-                    sh "kubectl apply -f FRONT_deployment.yaml"
-                    sh "kubectl apply -f NGINX_deployment.yaml"
+                    sh "helm install full-stack helm-charts/full-stack --set backend.image.repository=alaabrahim/tpfoyer-17"
                 }
             }
         }
