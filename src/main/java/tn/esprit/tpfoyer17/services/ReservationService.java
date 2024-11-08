@@ -38,12 +38,8 @@ public class ReservationService implements IReservationService{
 
     @Override
     public Reservation getReservationById(String idReservation) {
-        Optional<Reservation> reservationOptional = reservationRepository.findById(idReservation);
-        if (reservationOptional.isPresent()) {
-            return reservationOptional.get();
-        } else {
-            throw new NoSuchElementException("Reservation with ID " + idReservation + " not found.");
-        }
+        return reservationRepository.findById(idReservation)
+                .orElseThrow(() -> new EntityNotFoundException("Reservation not found with id: " + idReservation));
     }
 
     @Override

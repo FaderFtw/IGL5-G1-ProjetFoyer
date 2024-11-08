@@ -1,5 +1,6 @@
 package tn.esprit.tpfoyer17.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -11,8 +12,6 @@ import tn.esprit.tpfoyer17.entities.enumerations.TypeChambre;
 import tn.esprit.tpfoyer17.repositories.ChambreRepository;
 
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -31,15 +30,13 @@ public class ChambreService implements IChambreService{
     public List<Chambre> getAllChambres() {
         return (List<Chambre>) chambreRepository.findAll();
     }
+
     @Override
     public Chambre getChambreById(long idChambre) {
-        Optional<Chambre> chambreOptional = chambreRepository.findById(idChambre);
-        if (chambreOptional.isPresent()) {
-            return chambreOptional.get();
-        } else {
-            throw new NoSuchElementException("Chambre with ID " + idChambre + " not found.");
-        }
+        return chambreRepository.findById(idChambre)
+                .orElseThrow(() -> new EntityNotFoundException("Chambre not found with id: " + idChambre));
     }
+
     @Override
     public void deleteChambre(long idChambre) {
         chambreRepository.deleteById(idChambre);

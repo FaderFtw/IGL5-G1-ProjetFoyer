@@ -1,5 +1,6 @@
 package tn.esprit.tpfoyer17.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -68,6 +69,19 @@ public class ReservationServiceTest {
     }
 
     @Test
+    public void testGetReservationById_NotFound() {
+        String idReservation = "1";
+        when(reservationRepository.findById(idReservation)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(EntityNotFoundException.class, () -> {
+            reservationService.getReservationById(idReservation);
+        });
+
+        assertEquals("Reservation not found with id: " + idReservation, exception.getMessage());
+        verify(reservationRepository, times(1)).findById(idReservation);
+    }
+
+    @Test
     public void testDeleteReservation() {
         String idReservation = "123";
 
@@ -110,7 +124,7 @@ public class ReservationServiceTest {
 
     @ParameterizedTest
     @CsvSource({
-            "TRIPLE, 3, false",
+            "TRIPLE, 3, false",  // Should trigger the condition where size > 1 and EstValide is set to false
             "TRIPLE, 2, false",
             "DOUBLE, 2, false",
             "DOUBLE, 1, false",
@@ -140,10 +154,17 @@ public class ReservationServiceTest {
         Reservation result = reservationService.ajouterReservation(idBloc, cinEtudiant);
 
         assertNotNull(result);
+
         assertEquals(expectedValid, result.isEstValide());
+
+        if (studentCount > 1) {
+            assertFalse(result.isEstValide());
+        }
+
         verify(reservationRepository, times(1)).findForReservation(idBloc);
         verify(reservationRepository, times(1)).save(any(Reservation.class));
     }
+
 
     @Test
     public void testAnnulerReservation() {

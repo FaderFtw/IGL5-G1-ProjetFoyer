@@ -12,8 +12,6 @@ import tn.esprit.tpfoyer17.repositories.FoyerRepository;
 import tn.esprit.tpfoyer17.repositories.UniversiteRepository;
 
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -33,15 +31,13 @@ public class FoyerService implements IFoyerService{
     public List<Foyer> getAllFoyers() {
         return (List<Foyer>) foyerRepository.findAll();
     }
+
     @Override
     public Foyer getFoyerById(long idFoyer) {
-        Optional<Foyer> foyerOptional = foyerRepository.findById(idFoyer);
-        if (foyerOptional.isPresent()) {
-            return foyerOptional.get();
-        } else {
-            throw new EntityNotFoundException("Foyer with ID " + idFoyer + " not found.");
-        }
+        return foyerRepository.findById(idFoyer)
+                .orElseThrow(() -> new EntityNotFoundException("Foyer not found with id: " + idFoyer));
     }
+
     @Override
     public void deleteFoyer(long idFoyer) {
         foyerRepository.deleteById(idFoyer);

@@ -1,6 +1,7 @@
 pipeline {
      environment {
-        git_branch = 'main'
+        // Note: Artifacts in 'maven-releases' are immutable; increment version or use 'maven-snapshots' for updates.
+        git_branch = 'develop'
 
         registry = "fadyzaafrane/tpfoyer-17"  // Replace with your Docker Hub username
         registryCredential = 'dockerhub_id'

@@ -1,5 +1,6 @@
 package tn.esprit.tpfoyer17.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -69,6 +70,19 @@ public class FoyerServiceTest {
     }
 
     @Test
+    public void testGetFoyerById_NotFound() {
+        long idFoyer = 1L;
+        when(foyerRepository.findById(idFoyer)).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+            foyerService.getFoyerById(idFoyer);
+        });
+
+        assertEquals("Foyer not found with id: " + idFoyer, exception.getMessage());
+        verify(foyerRepository, times(1)).findById(idFoyer);
+    }
+
+    @Test
     public void testDeleteFoyer() {
         long idFoyer = 1L;
 
@@ -102,5 +116,21 @@ public class FoyerServiceTest {
         assertEquals(mockFoyer, result);
         verify(universiteRepository, times(1)).findById(idUniversite);
         verify(universiteRepository, times(1)).save(mockUniversite);
+    }
+
+    @Test
+    public void testAjouterFoyerEtAffecterAUniversite_UniversiteNotFound() {
+        Foyer mockFoyer = new Foyer();
+        long idUniversite = 1L;
+
+        when(foyerRepository.save(any(Foyer.class))).thenReturn(mockFoyer);
+        when(universiteRepository.findById(idUniversite)).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+            foyerService.ajouterFoyerEtAffecterAUniversite(mockFoyer, idUniversite);
+        });
+
+        assertEquals("Universite with ID " + idUniversite + " not found", exception.getMessage());
+        verify(universiteRepository, times(1)).findById(idUniversite);
     }
 }
