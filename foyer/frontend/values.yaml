@@ -1,0 +1,7 @@
+replicas: 2
+image:
+  repository: alaabrahim/foyer-frontend
+  tag: latest
+service:
+  type: ClusterIP
+  port: 3000
