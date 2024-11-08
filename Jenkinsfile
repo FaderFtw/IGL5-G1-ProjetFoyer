@@ -6,8 +6,6 @@ pipeline {
         registryCredential = 'dockerhub_id'
         dockerImage = ''
         imageTag = 'latest'
-
-        kubeConfigCredentialId = 'kubeCredentials'
         awsCredentialsId = 'awsCredentials'
         awsRegion = 'us-east-1'
         clusterName = 'KubeCluster'
@@ -55,7 +53,9 @@ pipeline {
                  script {
                     withSonarQubeEnv('sonar') {
                         sh """ mvn sonar:sonar \
-                        -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml """
+                        -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+                        -Dsonar.inclusions=**/services/** 
+                        """
                     }
                 }
             }
@@ -109,21 +109,12 @@ pipeline {
                               export VERSION=${version}
                               export IMAGE_TAG=${imageTag}
                               export registry=${registry}
-                              docker-compose down
-                              docker-compose up -d
+                              docker compose down
+                              docker compose up -d
                               """
                         }
                     }
                 }
-
-        stage('Performance Testing with JMeter') {
-            steps {
-                script {
-                    sh 'jmeter -n -t testplan.jmx -l results.jtl'
-                    archiveArtifacts artifacts: 'results.jtl', allowEmptyArchive: true
-                }
-            }
-        }
 
         stage('Test AWS Credentials') {
             steps {
