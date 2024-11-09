@@ -167,7 +167,7 @@ pipeline {
         stage('DEPLOY TO AWS KUBERNETES using helm') {
             steps {
                 script {
-                    sh "helm install full-stack helm-charts/full-stack --set backend.image.repository=${registry} --set backend.image.tag=${imageTag}"
+                    sh "helm install full-stack helm-charts/full-stack --set backend.image.repository=${registry} --set backend.image.tag=${imageTag} --set backend.image.pullPolicy=Always"
                 }
             }
         }
