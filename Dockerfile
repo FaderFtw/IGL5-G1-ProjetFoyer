@@ -1,8 +1,8 @@
 FROM openjdk:17-jdk-alpine
 
-COPY target/tpFoyer-17-*.jar /app.jar
 
-RUN ls -la /app.jar
+
+COPY target/tpFoyer-17-*.jar /app.jar
 
 EXPOSE 8080
 
